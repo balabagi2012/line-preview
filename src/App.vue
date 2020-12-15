@@ -142,16 +142,33 @@
         </el-col>
         <el-col :span="8" class="node-container">
           <el-row>
-            <el-button type="warning" @click="addImage">新增圖片</el-button>
-            <el-button type="primary" @click="addDescription"
-              >新增敘述</el-button
-            >
-            <el-button type="success" @click="addButton">新增按鈕</el-button>
+            <el-dropdown style="margin-right: 12px">
+              <el-button
+                type="primary"
+                icon="el-icon-plus"
+                :disabled="canAddItems.length == 0"
+              ></el-button>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item
+                  v-for="(item, key) in canAddItems"
+                  :key="key"
+                  >{{ item.type }}</el-dropdown-item
+                >
+              </el-dropdown-menu>
+            </el-dropdown>
+
+            <el-button icon="el-icon-arrow-up" @click="nodeUp"></el-button>
+            <el-button icon="el-icon-arrow-down" @click="nodeDown"></el-button>
+            <el-button
+              type="danger"
+              icon="el-icon-delete"
+              :disabled="!canRemove"
+            ></el-button>
           </el-row>
           <el-select
             v-model="style"
             placeholder="請選擇"
-            style="width: 100%; margin-top: 20px"
+            style="width: 100%; margin: 20px 0"
           >
             <el-option
               v-for="n in 6"
@@ -232,8 +249,13 @@
               <el-input type="text" v-model="button.payload"></el-input>
             </el-form-item>
             <el-form-item
-              :label="'按鈕文字'"
-              v-if="selectMenuItem.type === 'Button'"
+              :label="'顯示文字'"
+              v-if="
+                selectMenuItem.type === 'Button' ||
+                selectMenuItem.type === 'Label' ||
+                selectMenuItem.type === 'P' ||
+                selectMenuItem.type === 'Note'
+              "
             >
               <el-input type="text" v-model="selectMenuItem.payload"></el-input>
             </el-form-item>
@@ -258,19 +280,40 @@
                 v-model="selectMenuItem.payload.value"
               ></el-input>
             </el-form-item>
+            <el-form-item
+              :label="'圖片管理'"
+              v-if="selectMenuItem.type === 'Image'"
+            >
+              <el-upload
+                class="upload-demo"
+                action="https://jsonplaceholder.typicode.com/posts/"
+                :auto-upload="false"
+                list-type="picture"
+                :file-list="[
+                  { name: 'default.jpg', url: selectMenuItem.payload },
+                ]"
+                :on-change="beforeUpload"
+                :multiple="false"
+              >
+                <el-button size="small" type="primary">更換圖片</el-button>
+                <div slot="tip" class="el-upload__tip">
+                  只能上傳jpg/png文件，且不超過1mb
+                </div>
+              </el-upload>
+            </el-form-item>
           </el-form>
         </el-col>
       </el-row>
       <el-dialog title="剪裁圖片" :visible.sync="showClipper">
         <clipper-basic
           ref="clipper"
-          :src="imgUrl"
+          :src="selectMenuItem.payload"
           :ratio="ratio"
           class="form-clip-container"
         />
         <span slot="footer" class="dialog-footer">
           <el-button>取消</el-button>
-          <el-button type="primary">剪裁</el-button>
+          <el-button type="primary" @click="clipImg">剪裁</el-button>
         </span>
       </el-dialog>
     </el-container>
@@ -287,7 +330,10 @@ export default {
   watch: {
     style: {
       handler(newValue) {
-        console.log(Mock[`style${newValue}`]);
+        this.selectMenuIndex =
+          Mock[`style${newValue}`].header.payload.length > 0
+            ? "header-0"
+            : "body-0";
         this.menu = Mock[`style${newValue}`];
       },
       immediate: false,
@@ -312,34 +358,83 @@ export default {
     onSelectMenuItem(index) {
       this.selectMenuIndex = index;
     },
-    addImage() {
-      const newImage = {
-        type: "圖片",
-        label: "圖片-" + (this.images.length + 1),
-      };
-      this.menu.push(newImage);
+
+    beforeUpload(file) {
+      this.transformFile(file);
+      return false;
     },
-    addDescription() {
-      const newDescription = {
-        type: "描述",
-        label: "描述-" + (this.descriptions.length + 1),
-        key: "key",
-        value: "value",
-      };
-      this.menu.push(newDescription);
+    transformFile(file) {
+      // if (this.imageConfig.image) URL.revokeObjectURL(this.imageConfig.image);
+      this.selectMenuItem.payload = file.url;
+      // this.imageConfig.image = file.raw;
+      this.showClipper = true;
     },
-    addButton() {
-      const newButton = {
-        type: "按鈕",
-        label: "按鈕-" + (this.buttons.length + 1),
-      };
-      this.menu.push(newButton);
+    clipImg() {
+      this.showClipper = false;
+      const canvas = this.$refs.clipper.clip(); //call component's clip method
+      this.selectMenuItem.payload = canvas.toDataURL("image/jpeg", 1);
+    },
+    nodeUp() {
+      const [type, i] = this.selectMenuIndex.split("-");
+      if (i === 0 || this.menu[type].payload.length === 1) {
+        return;
+      }
+      this.menu[type].payload = this.swapArrayLocs(
+        this.menu[type].payload,
+        parseInt(i),
+        parseInt(i) - 1
+      );
+      this.$forceUpdate();
+    },
+    nodeDown() {
+      const [type, i] = this.selectMenuIndex.split("-");
+      if (
+        this.menu[type].payload.length === 1 ||
+        i === this.menu[type].payload.length - 1
+      ) {
+        return;
+      }
+      this.menu[type].payload = this.swapArrayLocs(
+        this.menu[type].payload,
+        parseInt(i),
+        parseInt(i) + 1
+      );
+      this.$forceUpdate();
+    },
+    swapArrayLocs(arr, index1, index2) {
+      console.log(arr);
+
+      const temp = arr[index1];
+      arr[index1] = arr[index2];
+      arr[index2] = temp;
+      console.log(arr);
+
+      return arr;
     },
   },
   computed: {
     selectMenuItem() {
       const [type, i] = this.selectMenuIndex.split("-");
       return this.menu[type].payload[i];
+    },
+    canAddItems() {
+      switch (this.style) {
+        case 1:
+          return [];
+        case 2:
+          return [];
+        case 3:
+          return [];
+        case 4:
+          return [];
+        case 5:
+          return [];
+        case 6:
+          return [];
+      }
+    },
+    canRemove() {
+      return false;
     },
   },
 };
@@ -622,6 +717,7 @@ export default {
   flex: 1;
   height: 100%;
   width: 100%;
+  overflow-y: scroll;
   background-color: #333;
   padding: 16px;
 }

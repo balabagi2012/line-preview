@@ -319,6 +319,7 @@
                 action="https://jsonplaceholder.typicode.com/posts/"
                 :auto-upload="false"
                 list-type="picture"
+                accept="image/png, image/jpeg, image/jpg"
                 :file-list="[
                   { name: 'default.jpg', url: selectMenuItem.payload.url },
                 ]"
@@ -431,6 +432,10 @@ export default {
       this.selectMenuIndex = index;
     },
     beforeUpload(file) {
+      if (file.size > 1024 * 1024 * 2) {
+        this.$message.error("超過檔案大小限制");
+        return false;
+      }
       this.transformFile(file);
       return false;
     },

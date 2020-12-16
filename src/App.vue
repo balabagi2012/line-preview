@@ -251,6 +251,15 @@
               <el-input type="text" v-model="button.payload"></el-input>
             </el-form-item>
             <el-form-item
+              :label="'按鈕樣式'"
+              v-if="selectMenuItem.type === 'Buttons'"
+            >
+              <el-select v-model="selectMenuItem.style">
+                <el-option label="horizontal" value="horizontal"></el-option>
+                <el-option label="vertical" value="vertical"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item
               :label="'顯示文字'"
               v-if="
                 selectMenuItem.type === 'Button' ||
@@ -358,15 +367,29 @@ export default {
   },
   methods: {
     addNode(type) {
+      let node = {};
       switch (type) {
         case "Description":
-          let node = {
+          node = {
             _id: nanoid(),
             type: "Description",
             payload: {
               key: "欄位",
               value: "段落",
             },
+          };
+          this.menu.body.payload.push(node);
+          break;
+        case "Button":
+          node = { _id: nanoid(), type: "Button", payload: "按鈕" };
+          this.menu.body.payload
+            .find((item) => item.type === "Buttons")
+            .payload.push(node);
+          break;
+        case "Separator":
+          node = {
+            _id: nanoid(),
+            type: "Separator",
           };
           this.menu.body.payload.push(node);
           break;
@@ -466,7 +489,7 @@ export default {
           const Buttons = this.menu.body.payload.find(
             (item) => item.type === "Buttons"
           );
-          if (Buttons && Buttons.payload.length <= 3) {
+          if (Buttons && Buttons.payload.length < 3) {
             nodes.push("Button");
           }
           return nodes;
@@ -474,9 +497,9 @@ export default {
         case 4:
           return [];
         case 5:
-          return [];
+          return ["Description"];
         case 6:
-          return [];
+          return ["Description", "Separator"];
       }
     },
     canRemove() {
@@ -501,10 +524,26 @@ export default {
         case 4:
           return false;
         case 5:
-          return false;
+          if (
+            this.selectMenuItem.type == "Description" &&
+            this.menu.body.payload.filter((item) => item.type === "Description")
+              .length > 1
+          ) {
+            return true;
+          }
         case 6:
-          return false;
+          if (
+            this.selectMenuItem.type == "Description" &&
+            this.menu.body.payload.filter((item) => item.type === "Description")
+              .length > 1
+          ) {
+            return true;
+          }
+          if (this.selectMenuItem.type == "Separator") {
+            return true;
+          }
       }
+      return false;
     },
   },
 };

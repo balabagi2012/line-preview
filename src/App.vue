@@ -31,14 +31,15 @@
                   :key="headerItem._id"
                   :style="`background-image:url(${headerItem.payload.url})`"
                 ></a>
-                <div
+                <a
                   class="demo-message-button"
                   :class="'style' + style"
                   v-else-if="headerItem.type === 'Button'"
                   :key="headerItem._id"
+                  :href="headerItem.payload.link"
                 >
-                  {{ headerItem.payload }}
-                </div>
+                  {{ headerItem.payload.text }}
+                </a>
                 <div
                   class="demo-description-box"
                   v-else-if="headerItem.type === 'Description'"
@@ -92,13 +93,14 @@
                   v-else-if="bodyItem.type === 'Buttons'"
                   :key="bodyItem._id"
                 >
-                  <div
+                  <a
                     class="demo-buttons-button"
                     v-for="button in bodyItem.payload"
                     :key="button._id"
+                    :href="button.payload.link"
                   >
-                    {{ button.payload }}
-                  </div>
+                    {{ button.payload.text }}
+                  </a>
                 </div>
                 <div
                   class="demo-message-img"
@@ -255,7 +257,16 @@
                 : []"
               :key="button._id"
             >
-              <el-input type="text" v-model="button.payload"></el-input>
+              <el-input type="text" v-model="button.payload.text"></el-input>
+            </el-form-item>
+            <el-form-item
+              :label="'按鈕' + index + '連結'"
+              v-for="(button, index) in selectMenuItem.type === 'Buttons'
+                ? selectMenuItem.payload
+                : []"
+              :key="button._id"
+            >
+              <el-input type="text" v-model="button.payload.link"></el-input>
             </el-form-item>
             <el-form-item
               :label="'按鈕樣式'"
@@ -269,13 +280,30 @@
             <el-form-item
               :label="'顯示文字'"
               v-if="
-                selectMenuItem.type === 'Button' ||
                 selectMenuItem.type === 'Label' ||
                 selectMenuItem.type === 'P' ||
                 selectMenuItem.type === 'Note'
               "
             >
               <el-input type="text" v-model="selectMenuItem.payload"></el-input>
+            </el-form-item>
+            <el-form-item
+              :label="'顯示文字'"
+              v-if="selectMenuItem.type === 'Button'"
+            >
+              <el-input
+                type="text"
+                v-model="selectMenuItem.payload.text"
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              :label="'按鈕連結'"
+              v-if="selectMenuItem.type === 'Button'"
+            >
+              <el-input
+                type="text"
+                v-model="selectMenuItem.payload.link"
+              ></el-input>
             </el-form-item>
             <el-form-item
               :label="'標題文字'"
@@ -400,7 +428,14 @@ export default {
           this.menu.body.payload.push(node);
           break;
         case "Button":
-          node = { _id: nanoid(), type: "Button", payload: "按鈕" };
+          node = {
+            _id: nanoid(),
+            type: "Button",
+            payload: {
+              link: "/",
+              text: "按鈕",
+            },
+          };
           this.menu.body.payload
             .find((item) => item.type === "Buttons")
             .payload.push(node);
@@ -770,6 +805,7 @@ export default {
         font-size: 20px;
         color: rgb(68, 68, 68);
         display: flex;
+        text-decoration: none;
         justify-content: center;
         align-items: center;
       }

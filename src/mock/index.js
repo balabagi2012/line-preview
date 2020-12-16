@@ -18,7 +18,10 @@ export const style1 = {
       {
         _id: "jMg5wEHMcXWI4YhrIuXID",
         type: "Button",
-        payload: "點我查看",
+        payload: {
+          link: "/",
+          text: "點我查看",
+        },
       },
     ],
   },
@@ -105,9 +108,30 @@ export const style3 = {
         type: "Buttons",
         style: "horizontal",
         payload: [
-          { _id: "qMg5wEHM2XWI4YhrIuX22", type: "Button", payload: "按鈕一" },
-          { _id: "qMg5wEHM2XWI4YhrIuX21", type: "Button", payload: "按鈕二" },
-          { _id: "qMg5wEHM2XWI4Yh23uX22", type: "Button", payload: "按鈕三" },
+          {
+            _id: "qMg5wEHM2XWI4YhrIuX22",
+            type: "Button",
+            payload: {
+              link: "/",
+              text: "點我查看",
+            },
+          },
+          {
+            _id: "qMg5wEHM2XWI4YhrIuX21",
+            type: "Button",
+            payload: {
+              link: "/",
+              text: "點我查看",
+            },
+          },
+          {
+            _id: "qMg5wEHM2XWI4Yh23uX22",
+            type: "Button",
+            payload: {
+              link: "/",
+              text: "點我查看",
+            },
+          },
         ],
       },
     ],

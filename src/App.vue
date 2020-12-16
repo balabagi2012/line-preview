@@ -13,7 +13,7 @@
                 <div
                   class="demo-message-badge"
                   v-if="headerItem.type === 'Badge'"
-                  :key="headerItem.payload"
+                  :key="headerItem._id"
                 >
                   {{ headerItem.payload }}
                 </div>
@@ -21,21 +21,21 @@
                   class="demo-message-img"
                   :class="'style' + style"
                   v-else-if="headerItem.type === 'Image'"
-                  :key="headerItem.payload"
+                  :key="headerItem._id"
                   :style="`background-image:url(${headerItem.payload})`"
                 ></div>
                 <div
                   class="demo-message-button"
                   :class="'style' + style"
                   v-else-if="headerItem.type === 'Button'"
-                  :key="headerItem.payload"
+                  :key="headerItem._id"
                 >
                   {{ headerItem.payload }}
                 </div>
                 <div
                   class="demo-description-box"
                   v-else-if="headerItem.type === 'Description'"
-                  :key="headerItem.payload.key"
+                  :key="headerItem.payload._id"
                 >
                   <div class="demo-description-key">
                     {{ headerItem.payload.key }}
@@ -53,21 +53,21 @@
                 <div
                   class="demo-message-badge"
                   v-if="bodyItem.type === 'Badge'"
-                  :key="bodyItem.payload"
+                  :key="bodyItem._id"
                 >
                   {{ bodyItem.payload }}
                 </div>
                 <div
                   class="demo-text-label"
                   v-else-if="bodyItem.type === 'Label'"
-                  :key="bodyItem.payload"
+                  :key="bodyItem._id"
                 >
                   {{ bodyItem.payload }}
                 </div>
                 <div
                   class="demo-description-box"
                   v-else-if="bodyItem.type === 'Description'"
-                  :key="bodyItem.payload.key"
+                  :key="bodyItem.payload._id"
                 >
                   <div class="demo-description-key">
                     {{ bodyItem.payload.key }}
@@ -83,12 +83,12 @@
                   class="demo-buttons-box"
                   :class="bodyItem.style"
                   v-else-if="bodyItem.type === 'Buttons'"
-                  :key="bodyItem.type"
+                  :key="bodyItem._id"
                 >
                   <div
                     class="demo-buttons-button"
                     v-for="button in bodyItem.payload"
-                    :key="button.payload"
+                    :key="button._id"
                   >
                     {{ button.payload }}
                   </div>
@@ -96,18 +96,18 @@
                 <div
                   class="demo-message-img"
                   v-else-if="bodyItem.type === 'Image'"
-                  :key="bodyItem.payload"
+                  :key="bodyItem._id"
                   :style="`background-image:url(${bodyItem.payload})`"
                 ></div>
                 <div
                   class="demo-message-separator"
                   v-else-if="bodyItem.type === 'Separator'"
-                  :key="bodyItem.payload"
+                  :key="bodyItem._id"
                 ></div>
                 <div
                   class="demo-text-p"
                   v-else-if="bodyItem.type === 'P'"
-                  :key="bodyItem.payload"
+                  :key="bodyItem._id"
                 >
                   {{ bodyItem.payload }}
                 </div>
@@ -118,13 +118,13 @@
                   <div
                     class="demo-text-note"
                     v-if="footerItem.type === 'Note'"
-                    :key="footerItem.payload"
+                    :key="footerItem._id"
                   >
                     {{ footerItem.payload }}
                   </div>
                   <div
                     v-else-if="footerItem.type === 'Description'"
-                    :key="footerItem.type"
+                    :key="footerItem._id"
                     style="display: flex; flex-direction: row; width: 100%"
                   >
                     <div class="demo-footer-key">
@@ -142,7 +142,7 @@
         </el-col>
         <el-col :span="8" class="node-container">
           <el-row>
-            <el-dropdown style="margin-right: 12px">
+            <el-dropdown style="margin-right: 12px" @command="addNode">
               <el-button
                 type="primary"
                 icon="el-icon-plus"
@@ -150,9 +150,10 @@
               ></el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item
+                  :command="item"
                   v-for="(item, key) in canAddItems"
                   :key="key"
-                  >{{ item.type }}</el-dropdown-item
+                  >{{ item }}</el-dropdown-item
                 >
               </el-dropdown-menu>
             </el-dropdown>
@@ -163,6 +164,7 @@
               type="danger"
               icon="el-icon-delete"
               :disabled="!canRemove"
+              @click="removeSelectedNode"
             ></el-button>
           </el-row>
           <el-select
@@ -244,7 +246,7 @@
               v-for="(button, index) in selectMenuItem.type === 'Buttons'
                 ? selectMenuItem.payload
                 : []"
-              :key="button.payload"
+              :key="button._id"
             >
               <el-input type="text" v-model="button.payload"></el-input>
             </el-form-item>
@@ -355,10 +357,28 @@ export default {
     };
   },
   methods: {
+    addNode(type) {
+      switch (type) {
+        case "Description":
+          let node = {
+            _id: nanoid(),
+            type: "Description",
+            payload: {
+              key: "欄位",
+              value: "段落",
+            },
+          };
+          this.menu.body.payload.push(node);
+          break;
+
+        default:
+          break;
+      }
+      this.$forceUpdate();
+    },
     onSelectMenuItem(index) {
       this.selectMenuIndex = index;
     },
-
     beforeUpload(file) {
       this.transformFile(file);
       return false;
@@ -384,6 +404,7 @@ export default {
         parseInt(i),
         parseInt(i) - 1
       );
+      this.selectMenuIndex = [type, parseInt(i) - 1].join("-");
       this.$forceUpdate();
     },
     nodeDown() {
@@ -399,17 +420,33 @@ export default {
         parseInt(i),
         parseInt(i) + 1
       );
+      this.selectMenuIndex = [type, parseInt(i) + 1].join("-");
       this.$forceUpdate();
     },
     swapArrayLocs(arr, index1, index2) {
-      console.log(arr);
-
       const temp = arr[index1];
       arr[index1] = arr[index2];
       arr[index2] = temp;
-      console.log(arr);
-
       return arr;
+    },
+    removeSelectedNode() {
+      const [type, i] = this.selectMenuIndex.split("-");
+      if (this.selectMenuItem.type === "Buttons") {
+        if (this.selectMenuItem.payload.length === 1) {
+          return;
+        }
+        this.selectMenuItem.payload = this.selectMenuItem.payload.slice(
+          0,
+          this.selectMenuItem.payload.length - 1
+        );
+      } else {
+        this.selectMenuIndex =
+          this.menu.header.payload.length > 0 ? "header-0" : "body-0";
+        this.menu[type].payload = this.menu[type].payload
+          .slice(0, i)
+          .concat(this.menu[type].payload.slice(parseInt(i) + 1));
+      }
+      this.$forceUpdate();
     },
   },
   computed: {
@@ -418,13 +455,22 @@ export default {
       return this.menu[type].payload[i];
     },
     canAddItems() {
+      let nodes = [];
       switch (this.style) {
         case 1:
           return [];
         case 2:
           return [];
         case 3:
-          return [];
+          nodes.push("Description");
+          const Buttons = this.menu.body.payload.find(
+            (item) => item.type === "Buttons"
+          );
+          if (Buttons && Buttons.payload.length <= 3) {
+            nodes.push("Button");
+          }
+          return nodes;
+
         case 4:
           return [];
         case 5:
@@ -434,7 +480,31 @@ export default {
       }
     },
     canRemove() {
-      return false;
+      switch (this.style) {
+        case 1:
+          return false;
+        case 2:
+          return false;
+        case 3:
+          if (
+            this.selectMenuItem.type == "Description" &&
+            this.menu.body.payload.filter((item) => item.type === "Description")
+              .length >= 0
+          ) {
+            return true;
+          } else if (
+            this.selectMenuItem.type == "Buttons" &&
+            this.menu.body.payload.find((item) => item.type === "Buttons")
+              .payload.length >= 1
+          )
+            return true;
+        case 4:
+          return false;
+        case 5:
+          return false;
+        case 6:
+          return false;
+      }
     },
   },
 };

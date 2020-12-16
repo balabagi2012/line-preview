@@ -17,13 +17,20 @@
                 >
                   {{ headerItem.payload }}
                 </div>
-                <div
+                <a
                   class="demo-message-img"
-                  :class="'style' + style"
+                  :class="[
+                    'style' + style,
+                    'count' + headerImgs.length,
+                    'image' +
+                      (headerImgs.findIndex((i) => i._id === headerItem._id) +
+                        1),
+                  ]"
+                  :href="headerItem.payload.link"
                   v-else-if="headerItem.type === 'Image'"
                   :key="headerItem._id"
-                  :style="`background-image:url(${headerItem.payload})`"
-                ></div>
+                  :style="`background-image:url(${headerItem.payload.url})`"
+                ></a>
                 <div
                   class="demo-message-button"
                   :class="'style' + style"
@@ -97,7 +104,7 @@
                   class="demo-message-img"
                   v-else-if="bodyItem.type === 'Image'"
                   :key="bodyItem._id"
-                  :style="`background-image:url(${bodyItem.payload})`"
+                  :style="`background-image:url(${bodyItem.payload.url})`"
                 ></div>
                 <div
                   class="demo-message-separator"
@@ -292,6 +299,18 @@
               ></el-input>
             </el-form-item>
             <el-form-item
+              :label="'圖片連結'"
+              v-if="
+                selectMenuItem.type === 'Image' &&
+                selectMenuIndex.includes('header')
+              "
+            >
+              <el-input
+                type="text"
+                v-model="selectMenuItem.payload.link"
+              ></el-input>
+            </el-form-item>
+            <el-form-item
               :label="'圖片管理'"
               v-if="selectMenuItem.type === 'Image'"
             >
@@ -301,7 +320,7 @@
                 :auto-upload="false"
                 list-type="picture"
                 :file-list="[
-                  { name: 'default.jpg', url: selectMenuItem.payload },
+                  { name: 'default.jpg', url: selectMenuItem.payload.url },
                 ]"
                 :on-change="beforeUpload"
                 :multiple="false"
@@ -318,7 +337,7 @@
       <el-dialog title="剪裁圖片" :visible.sync="showClipper">
         <clipper-basic
           ref="clipper"
-          :src="selectMenuItem.payload"
+          :src="selectMenuItem.payload.url"
           :ratio="ratio"
           class="form-clip-container"
         />
@@ -356,7 +375,6 @@ export default {
       menu: Mock.style1,
       form: {},
       style: 1,
-      ratio: 1,
       isCollapse: false,
       showClipper: false,
       imgUrl:
@@ -393,7 +411,17 @@ export default {
           };
           this.menu.body.payload.push(node);
           break;
-
+        case "Image":
+          node = {
+            _id: nanoid(),
+            type: "Image",
+            payload: {
+              url: this.imgUrl,
+              link: "/",
+            },
+          };
+          this.menu.header.payload.push(node);
+          break;
         default:
           break;
       }
@@ -408,14 +436,14 @@ export default {
     },
     transformFile(file) {
       // if (this.imageConfig.image) URL.revokeObjectURL(this.imageConfig.image);
-      this.selectMenuItem.payload = file.url;
+      this.selectMenuItem.payload.url = file.url;
       // this.imageConfig.image = file.raw;
       this.showClipper = true;
     },
     clipImg() {
       this.showClipper = false;
       const canvas = this.$refs.clipper.clip(); //call component's clip method
-      this.selectMenuItem.payload = canvas.toDataURL("image/jpeg", 1);
+      this.selectMenuItem.payload.url = canvas.toDataURL("image/jpeg", 1);
     },
     nodeUp() {
       const [type, i] = this.selectMenuIndex.split("-");
@@ -473,6 +501,36 @@ export default {
     },
   },
   computed: {
+    headerImgs() {
+      return this.menu.header.payload.filter((item) => item.type === "Image");
+    },
+    ratio() {
+      if (this.selectMenuIndex.includes("header")) {
+        switch (this.style) {
+          case 1:
+          case 2:
+            return 1;
+          case 3:
+          case 5:
+            return 300 / 195;
+          case 4:
+            const headerImgs = this.menu.header.payload.filter(
+              (item) => item.type === "Image"
+            );
+            if (headerImgs.length == 2) {
+              return 300 / 195 / 2;
+            } else if (headerImgs.length == 3) {
+              const index = headerImgs.findIndex(
+                (i) => i._id === this.selectMenuItem._id
+              );
+              return index === 0 ? 300 / 195 / 2 : 300 / 195;
+            }
+          default:
+            break;
+        }
+      }
+      return 1;
+    },
     selectMenuItem() {
       const [type, i] = this.selectMenuIndex.split("-");
       return this.menu[type].payload[i];
@@ -493,11 +551,14 @@ export default {
             nodes.push("Button");
           }
           return nodes;
-
-        case 4:
-          return [];
         case 5:
           return ["Description"];
+        case 4:
+          const Images = this.headerImgs;
+          if (Images && Images.length < 3) {
+            nodes.push("Image");
+          }
+          return nodes;
         case 6:
           return ["Description", "Separator"];
       }
@@ -521,12 +582,18 @@ export default {
               .payload.length >= 1
           )
             return true;
-        case 4:
-          return false;
         case 5:
+          return false;
+        case 4:
           if (
             this.selectMenuItem.type == "Description" &&
             this.menu.body.payload.filter((item) => item.type === "Description")
+              .length > 1
+          ) {
+            return true;
+          } else if (
+            this.selectMenuItem.type == "Image" &&
+            this.menu.header.payload.filter((item) => item.type === "Image")
               .length > 1
           ) {
             return true;
@@ -595,6 +662,20 @@ export default {
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      overflow: hidden;
+      border-top-left-radius: 17px;
+      border-top-right-radius: 17px;
+      &.style1,
+      &.style2 {
+        height: 300px;
+        border-bottom-left-radius: 17px;
+        border-bottom-right-radius: 17px;
+      }
+      &.style3,
+      &.style4,
+      &.style5 {
+        height: 195px;
+      }
       &.style3 {
         .demo-message-button {
           display: none;
@@ -613,23 +694,66 @@ export default {
         justify-content: center;
         align-items: center;
       }
-      .demo-message-img {
+      > .demo-message-img {
         width: 100%;
         background-origin: center;
         background-position: center;
         background-size: cover;
-        border-top-left-radius: 17px;
-        border-top-right-radius: 17px;
         &.style1,
         &.style2 {
           height: 300px;
-          border-bottom-left-radius: 17px;
-          border-bottom-right-radius: 17px;
         }
         &.style3,
-        &.style4,
         &.style5 {
           height: 195px;
+        }
+        &.style4 {
+          &.count1 {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 300px;
+            height: 195px;
+          }
+          &.count2 {
+            &.image1 {
+              position: absolute;
+              width: 150px;
+              height: 195px;
+              left: 0;
+              top: 0;
+            }
+            &.image2 {
+              position: absolute;
+              width: 150px;
+              height: 195px;
+              right: 0;
+              top: 0;
+            }
+          }
+          &.count3 {
+            &.image1 {
+              position: absolute;
+              width: 150px;
+              height: 195px;
+              left: 0;
+              top: 0;
+            }
+            &.image2 {
+              position: absolute;
+              width: 150px;
+              height: calc(195px / 2);
+              right: 0;
+              top: 0;
+            }
+            &.image3 {
+              position: absolute;
+              width: 150px;
+              height: calc(195px / 2);
+              right: 0;
+              bottom: 0;
+            }
+          }
         }
       }
       .demo-message-button {

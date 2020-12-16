@@ -4,8 +4,11 @@ export const style1 = {
       {
         _id: "jMg5wEHMcXWI4YhrIuXIF",
         type: "Image",
-        payload:
-          "https://scdn.line-apps.com/n/channel_devcenter/img/flexsnapshot/clip/clip1.jpg",
+        payload: {
+          url:
+            "https://scdn.line-apps.com/n/channel_devcenter/img/flexsnapshot/clip/clip1.jpg",
+          link: "/",
+        },
       },
       {
         _id: "jMg5wEHMcXWI4YhrIuXIE",
@@ -34,8 +37,11 @@ export const style2 = {
       {
         _id: "jMg5wEHMcXWI4YhrIuXwF",
         type: "Image",
-        payload:
-          "https://scdn.line-apps.com/n/channel_devcenter/img/flexsnapshot/clip/clip3.jpg",
+        payload: {
+          url:
+            "https://scdn.line-apps.com/n/channel_devcenter/img/flexsnapshot/clip/clip3.jpg",
+          link: "/",
+        },
       },
       {
         _id: "jMg5wEHMcXWI4YhrIuXw3",
@@ -62,8 +68,11 @@ export const style3 = {
       {
         _id: "jMg5wEHMcXWI4YhrIuXwF",
         type: "Image",
-        payload:
-          "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
+        payload: {
+          url:
+            "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
+          link: "/",
+        },
       },
     ],
   },
@@ -114,8 +123,11 @@ export const style4 = {
       {
         _id: "qMg5wEHM2XWI4YhrIuX22",
         type: "Image",
-        payload:
-          "https://scdn.line-apps.com/n/channel_devcenter/img/flexsnapshot/clip/clip4.jpg",
+        payload: {
+          url:
+            "https://scdn.line-apps.com/n/channel_devcenter/img/flexsnapshot/clip/clip4.jpg",
+          link: "/",
+        },
       },
       { _id: "qMg5wEHM2XWI2YhrIuX22", type: "Badge", payload: "NEW" },
     ],
@@ -154,8 +166,11 @@ export const style5 = {
       {
         _id: "qqa5wEHM2XWI4YhrIuX22",
         type: "Image",
-        payload:
-          "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_3_movie.png",
+        payload: {
+          url:
+            "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_3_movie.png",
+          link: "/",
+        },
       },
     ],
   },
@@ -194,8 +209,11 @@ export const style5 = {
       {
         _id: "qqwswEHM2XWI5YhrIuX22",
         type: "Image",
-        payload:
-          "https://scdn.line-apps.com/n/channel_devcenter/img/fx/linecorp_code_withborder.png",
+        payload: {
+          url:
+            "https://scdn.line-apps.com/n/channel_devcenter/img/fx/linecorp_code_withborder.png",
+          link: "/",
+        },
       },
     ],
   },

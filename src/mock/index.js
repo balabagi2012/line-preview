@@ -109,7 +109,7 @@ export const style3 = {
         style: "horizontal",
         payload: [
           {
-            _id: "qMg5wEHM2XWI4YhrIuX22",
+            _id: "qMg5wEHM2XWI4YhrIuX55",
             type: "Button",
             payload: {
               link: "/",
@@ -117,7 +117,7 @@ export const style3 = {
             },
           },
           {
-            _id: "qMg5wEHM2XWI4YhrIuX21",
+            _id: "qMg5wEHM2XWI4YhrIuX44",
             type: "Button",
             payload: {
               link: "/",
@@ -125,7 +125,7 @@ export const style3 = {
             },
           },
           {
-            _id: "qMg5wEHM2XWI4Yh23uX22",
+            _id: "qMg5wEHM2XWI4Yh23uX33",
             type: "Button",
             payload: {
               link: "/",

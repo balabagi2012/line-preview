@@ -1,5 +1,5 @@
 <template>
-  <el-container>
+  <el-container class="line-preview">
     <el-header class="header">
       <h1>Line Preview</h1>
     </el-header>
@@ -166,9 +166,16 @@
                 >
               </el-dropdown-menu>
             </el-dropdown>
-
-            <el-button icon="el-icon-arrow-up" @click="nodeUp"></el-button>
-            <el-button icon="el-icon-arrow-down" @click="nodeDown"></el-button>
+            <el-button
+              icon="el-icon-arrow-up"
+              @click="nodeUp"
+              :disabled="!canUp"
+            ></el-button>
+            <el-button
+              icon="el-icon-arrow-down"
+              @click="nodeDown"
+              :disabled="!canDown"
+            ></el-button>
             <el-button
               type="danger"
               icon="el-icon-delete"
@@ -190,14 +197,15 @@
             </el-option>
           </el-select>
           <el-menu
-            default-active="1"
+            :default-active="activeIndex"
             :collapse="isCollapse"
             @select="onSelectMenuItem"
             background-color="transparent"
             text-color="#fff"
             active-text-color="#ffd04b"
+            ref="menu"
           >
-            <el-submenu index="1">
+            <el-submenu index="1" v-if="menu.header.payload.length > 0">
               <template slot="title">
                 <i class="el-icon-location"></i>
                 <span>header</span>
@@ -211,7 +219,7 @@
                 >
               </el-menu-item-group>
             </el-submenu>
-            <el-submenu index="2">
+            <el-submenu index="2" v-if="menu.body.payload.length > 0">
               <template slot="title">
                 <i class="el-icon-location"></i>
                 <span>body</span>
@@ -225,7 +233,7 @@
                 >
               </el-menu-item-group>
             </el-submenu>
-            <el-submenu index="3">
+            <el-submenu index="3" v-if="menu.footer.payload.length > 0">
               <template slot="title">
                 <i class="el-icon-location"></i>
                 <span>footer</span>
@@ -248,25 +256,11 @@
               label="顯示文字"
               v-if="selectMenuItem.type === 'Badge'"
             >
-              <el-input type="text" v-model="selectMenuItem.payload"></el-input>
-            </el-form-item>
-            <el-form-item
-              :label="'按鈕' + index + '文字'"
-              v-for="(button, index) in selectMenuItem.type === 'Buttons'
-                ? selectMenuItem.payload
-                : []"
-              :key="button._id"
-            >
-              <el-input type="text" v-model="button.payload.text"></el-input>
-            </el-form-item>
-            <el-form-item
-              :label="'按鈕' + index + '連結'"
-              v-for="(button, index) in selectMenuItem.type === 'Buttons'
-                ? selectMenuItem.payload
-                : []"
-              :key="button._id"
-            >
-              <el-input type="text" v-model="button.payload.link"></el-input>
+              <el-input
+                type="text"
+                v-model="selectMenuItem.payload"
+                :maxlength="14"
+              ></el-input>
             </el-form-item>
             <el-form-item
               :label="'按鈕樣式'"
@@ -278,14 +272,49 @@
               </el-select>
             </el-form-item>
             <el-form-item
+              :label="'按鈕' + (index + 1) + '文字'"
+              v-for="(button, index) in selectMenuItem.type === 'Buttons'
+                ? selectMenuItem.payload
+                : []"
+              :key="button._id + 'text'"
+            >
+              <el-input
+                type="text"
+                maxlength="8"
+                v-model="button.payload.text"
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              :label="'按鈕' + (index + 1) + '連結'"
+              v-for="(button, index) in selectMenuItem.type === 'Buttons'
+                ? selectMenuItem.payload
+                : []"
+              :key="button._id + 'link'"
+            >
+              <el-input type="text" v-model="button.payload.link"></el-input>
+            </el-form-item>
+
+            <el-form-item
+              :label="'顯示文字'"
+              v-if="selectMenuItem.type === 'Label'"
+            >
+              <el-input
+                type="text"
+                maxlength="10"
+                v-model="selectMenuItem.payload"
+              ></el-input>
+            </el-form-item>
+            <el-form-item
               :label="'顯示文字'"
               v-if="
-                selectMenuItem.type === 'Label' ||
-                selectMenuItem.type === 'P' ||
-                selectMenuItem.type === 'Note'
+                selectMenuItem.type === 'P' || selectMenuItem.type === 'Note'
               "
             >
-              <el-input type="text" v-model="selectMenuItem.payload"></el-input>
+              <el-input
+                type="text"
+                v-model="selectMenuItem.payload"
+                maxlength="40"
+              ></el-input>
             </el-form-item>
             <el-form-item
               :label="'顯示文字'"
@@ -293,6 +322,7 @@
             >
               <el-input
                 type="text"
+                maxlength="8"
                 v-model="selectMenuItem.payload.text"
               ></el-input>
             </el-form-item>
@@ -312,17 +342,19 @@
               <el-input
                 type="text"
                 v-model="selectMenuItem.payload.key"
+                maxlength="6"
               ></el-input>
             </el-form-item>
             <el-form-item
               :label="'內容文字'"
               v-if="
                 selectMenuItem.type === 'Description' &&
-                selectMenuItem.payload.value
+                selectMenuItem.payload.value !== null
               "
             >
               <el-input
                 type="text"
+                maxlength="15"
                 v-model="selectMenuItem.payload.value"
               ></el-input>
             </el-form-item>
@@ -400,6 +432,7 @@ export default {
   },
   data() {
     return {
+      activeIndex: "header-0",
       selectMenuIndex: "header-0",
       menu: Mock.style1,
       form: {},
@@ -486,32 +519,27 @@ export default {
       this.selectMenuItem.payload.url = canvas.toDataURL("image/jpeg", 1);
     },
     nodeUp() {
+      if (!this.canUp) return;
       const [type, i] = this.selectMenuIndex.split("-");
-      if (i === 0 || this.menu[type].payload.length === 1) {
-        return;
-      }
       this.menu[type].payload = this.swapArrayLocs(
         this.menu[type].payload,
         parseInt(i),
         parseInt(i) - 1
       );
       this.selectMenuIndex = [type, parseInt(i) - 1].join("-");
+      this.$refs.menu.activeIndex = [type, parseInt(i) - 1].join("-");
       this.$forceUpdate();
     },
     nodeDown() {
+      if (!this.canDown) return;
       const [type, i] = this.selectMenuIndex.split("-");
-      if (
-        this.menu[type].payload.length === 1 ||
-        i === this.menu[type].payload.length - 1
-      ) {
-        return;
-      }
       this.menu[type].payload = this.swapArrayLocs(
         this.menu[type].payload,
         parseInt(i),
         parseInt(i) + 1
       );
       this.selectMenuIndex = [type, parseInt(i) + 1].join("-");
+      this.$refs.menu.activeIndex = [type, parseInt(i) + 1].join("-");
       this.$forceUpdate();
     },
     swapArrayLocs(arr, index1, index2) {
@@ -541,6 +569,17 @@ export default {
     },
   },
   computed: {
+    canUp() {
+      const [type, i] = this.selectMenuIndex.split("-");
+      return this.menu[type].payload.length > 1 && parseInt(i) !== 0;
+    },
+    canDown() {
+      const [type, i] = this.selectMenuIndex.split("-");
+      return (
+        this.menu[type].payload.length > 1 &&
+        parseInt(i) !== this.menu[type].payload.length - 1
+      );
+    },
     headerImgs() {
       return this.menu.header.payload.filter((item) => item.type === "Image");
     },
@@ -618,8 +657,7 @@ export default {
             return true;
           } else if (
             this.selectMenuItem.type == "Buttons" &&
-            this.menu.body.payload.find((item) => item.type === "Buttons")
-              .payload.length >= 1
+            this.selectMenuItem.payload.length > 1
           )
             return true;
         case 5:
@@ -657,6 +695,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.line-preview {
+  font-family: "黑體-繁", "微軟正黑體";
+}
 .header {
   background-color: #f4f6f9;
   display: flex;
@@ -918,6 +959,7 @@ export default {
           align-items: center;
           text-align: center;
           color: #42659a;
+          text-decoration: none;
         }
         &.vertical {
           flex-direction: column;

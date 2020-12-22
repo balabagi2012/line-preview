@@ -2,6 +2,9 @@
   <el-container class="line-preview">
     <el-header class="header">
       <h1>Line Preview</h1>
+      <el-button type="primary" icon="el-icon-upload" @click="exportData"
+        >輸出
+      </el-button>
     </el-header>
     <el-container>
       <el-row type="flex">
@@ -15,7 +18,11 @@
                   v-if="headerItem.type === 'Badge'"
                   :key="headerItem._id"
                 >
-                  {{ headerItem.payload }}
+                  {{
+                    headerItem.payload.length > 10
+                      ? headerItem.payload.slice(0, 10) + "..."
+                      : headerItem.payload
+                  }}
                 </div>
                 <a
                   class="demo-message-img"
@@ -38,7 +45,11 @@
                   :key="headerItem._id"
                   :href="headerItem.payload.link"
                 >
-                  {{ headerItem.payload.text }}
+                  {{
+                    headerItem.payload.text.length > 10
+                      ? headerItem.payload.text.slice(0, 10) + "..."
+                      : headerItem.payload.text
+                  }}
                 </a>
                 <div
                   class="demo-description-box"
@@ -46,7 +57,11 @@
                   :key="headerItem.payload._id"
                 >
                   <div class="demo-description-key">
-                    {{ headerItem.payload.key }}
+                    {{
+                      headerItem.payload.key.length > 10
+                        ? headerItem.payload.key.slice(0, 10) + "..."
+                        : headerItem.payload.key
+                    }}
                   </div>
                   <div class="demo-description-value">
                     {{ headerItem.payload.value }}
@@ -63,21 +78,39 @@
                   v-if="bodyItem.type === 'Badge'"
                   :key="bodyItem._id"
                 >
-                  {{ bodyItem.payload }}
+                  {{
+                    bodyItem.payload.length > 10
+                      ? bodyItem.payload.slice(0, 10) + "..."
+                      : bodyItem.payload
+                  }}
                 </div>
                 <div
                   class="demo-text-label"
                   v-else-if="bodyItem.type === 'Label'"
                   :key="bodyItem._id"
                 >
-                  {{ bodyItem.payload }}
+                  {{
+                    bodyItem.payload.length > 10
+                      ? bodyItem.payload.slice(0, 10) + "..."
+                      : bodyItem.payload
+                  }}
                 </div>
                 <div
                   class="demo-description-box"
                   v-else-if="bodyItem.type === 'Description'"
                   :key="bodyItem.payload._id"
                 >
-                  <div class="demo-description-key">
+                  <div
+                    class="demo-description-key"
+                    v-if="[3, 5, 6].includes(style)"
+                  >
+                    {{
+                      bodyItem.payload.key.length > 3
+                        ? bodyItem.payload.key.slice(0, 3) + "..."
+                        : bodyItem.payload.key
+                    }}
+                  </div>
+                  <div class="demo-description-key" v-else>
                     {{ bodyItem.payload.key }}
                   </div>
                   <div
@@ -99,7 +132,11 @@
                     :key="button._id"
                     :href="button.payload.link"
                   >
-                    {{ button.payload.text }}
+                    {{
+                      button.payload.text.length > 10
+                        ? button.payload.text.slice(0, 10) + "..."
+                        : button.payload.text
+                    }}
                   </a>
                 </div>
                 <div
@@ -118,7 +155,11 @@
                   v-else-if="bodyItem.type === 'P'"
                   :key="bodyItem._id"
                 >
-                  {{ bodyItem.payload }}
+                  {{
+                    bodyItem.payload.length > 400
+                      ? bodyItem.payload.slice(0, 400) + "..."
+                      : bodyItem.payload
+                  }}
                 </div>
               </template>
               <!-- Footer Start -->
@@ -129,7 +170,11 @@
                     v-if="footerItem.type === 'Note'"
                     :key="footerItem._id"
                   >
-                    {{ footerItem.payload }}
+                    {{
+                      footerItem.payload.length > 400
+                        ? footerItem.payload.slice(0, 400) + "..."
+                        : footerItem.payload
+                    }}
                   </div>
                   <div
                     v-else-if="footerItem.type === 'Description'"
@@ -137,10 +182,18 @@
                     style="display: flex; flex-direction: row; width: 100%"
                   >
                     <div class="demo-footer-key">
-                      {{ footerItem.payload.key }}
+                      {{
+                        footerItem.payload.key.length > 10
+                          ? footerItem.payload.key.slice(0, 10) + "..."
+                          : footerItem.payload.key
+                      }}
                     </div>
                     <div class="demo-footer-value">
-                      {{ footerItem.payload.value }}
+                      {{
+                        footerItem.payload.value.length > 400
+                          ? footerItem.payload.value.slice(0, 400) + "..."
+                          : footerItem.payload.value
+                      }}
                     </div>
                   </div>
                 </template>
@@ -150,7 +203,7 @@
           </div>
         </el-col>
         <el-col :span="8" class="node-container">
-          <el-row>
+          <el-row class="node-tools">
             <el-dropdown style="margin-right: 12px" @command="addNode">
               <el-button
                 type="primary"
@@ -196,58 +249,60 @@
             >
             </el-option>
           </el-select>
-          <el-menu
-            :default-active="activeIndex"
-            :collapse="isCollapse"
-            @select="onSelectMenuItem"
-            background-color="transparent"
-            text-color="#fff"
-            active-text-color="#ffd04b"
-            ref="menu"
-          >
-            <el-submenu index="1" v-if="menu.header.payload.length > 0">
-              <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>header</span>
-              </template>
-              <el-menu-item-group>
-                <el-menu-item
-                  :index="`header-${i}`"
-                  :key="`header-${i}`"
-                  v-for="(item, i) in menu.header.payload"
-                  >{{ item.type }}</el-menu-item
-                >
-              </el-menu-item-group>
-            </el-submenu>
-            <el-submenu index="2" v-if="menu.body.payload.length > 0">
-              <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>body</span>
-              </template>
-              <el-menu-item-group>
-                <el-menu-item
-                  :index="`body-${i}`"
-                  :key="`body-${i}`"
-                  v-for="(item, i) in menu.body.payload"
-                  >{{ item.type }}</el-menu-item
-                >
-              </el-menu-item-group>
-            </el-submenu>
-            <el-submenu index="3" v-if="menu.footer.payload.length > 0">
-              <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>footer</span>
-              </template>
-              <el-menu-item-group>
-                <el-menu-item
-                  :index="`footer-${i}`"
-                  :key="`footer-${i}`"
-                  v-for="(item, i) in menu.footer.payload"
-                  >{{ item.type }}</el-menu-item
-                >
-              </el-menu-item-group>
-            </el-submenu>
-          </el-menu>
+          <el-col :span="24" class="node-menu">
+            <el-menu
+              :default-active="activeIndex"
+              :collapse="isCollapse"
+              @select="onSelectMenuItem"
+              background-color="transparent"
+              text-color="#fff"
+              active-text-color="#ffd04b"
+              ref="menu"
+            >
+              <el-submenu index="1" v-if="menu.header.payload.length > 0">
+                <template slot="title">
+                  <i class="el-icon-location"></i>
+                  <span>header</span>
+                </template>
+                <el-menu-item-group>
+                  <el-menu-item
+                    :index="`header-${i}`"
+                    :key="`header-${i}`"
+                    v-for="(item, i) in menu.header.payload"
+                    >{{ item.type }}</el-menu-item
+                  >
+                </el-menu-item-group>
+              </el-submenu>
+              <el-submenu index="2" v-if="menu.body.payload.length > 0">
+                <template slot="title">
+                  <i class="el-icon-location"></i>
+                  <span>body</span>
+                </template>
+                <el-menu-item-group>
+                  <el-menu-item
+                    :index="`body-${i}`"
+                    :key="`body-${i}`"
+                    v-for="(item, i) in menu.body.payload"
+                    >{{ item.type }}</el-menu-item
+                  >
+                </el-menu-item-group>
+              </el-submenu>
+              <el-submenu index="3" v-if="menu.footer.payload.length > 0">
+                <template slot="title">
+                  <i class="el-icon-location"></i>
+                  <span>footer</span>
+                </template>
+                <el-menu-item-group>
+                  <el-menu-item
+                    :index="`footer-${i}`"
+                    :key="`footer-${i}`"
+                    v-for="(item, i) in menu.footer.payload"
+                    >{{ item.type }}</el-menu-item
+                  >
+                </el-menu-item-group>
+              </el-submenu>
+            </el-menu>
+          </el-col>
         </el-col>
         <el-col :span="8" class="form-container">
           <el-form ref="form" :model="form" label-width="80px">
@@ -280,7 +335,7 @@
             >
               <el-input
                 type="text"
-                maxlength="8"
+                maxlength="10"
                 v-model="button.payload.text"
               ></el-input>
             </el-form-item>
@@ -548,6 +603,10 @@ export default {
       arr[index2] = temp;
       return arr;
     },
+    exportData() {
+      alert("查看Console");
+      console.log(this.menu);
+    },
     removeSelectedNode() {
       const [type, i] = this.selectMenuIndex.split("-");
       if (this.selectMenuItem.type === "Buttons") {
@@ -728,6 +787,8 @@ export default {
   flex: 1;
   height: 100%;
   width: 100%;
+  max-height: calc(100vh - 60px);
+  overflow-y: scroll;
   .demo-message-container {
     width: 300px;
     display: flex;
@@ -1033,9 +1094,24 @@ export default {
   flex: 1;
   height: 100%;
   width: 100%;
-  overflow-y: scroll;
   background-color: #333;
   padding: 16px;
+  max-height: calc(100vh - 60px);
+  overflow-y: scroll;
+  position: relative;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  .node-menu {
+    flex: 1;
+    height: 100%;
+    width: 100%;
+    background-color: #333;
+    overflow: scroll;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 }
 
 .form-container {
@@ -1044,6 +1120,8 @@ export default {
   width: 100%;
   background-color: #eee;
   padding: 16px;
+  max-height: calc(100vh - 60px);
+  overflow-y: scroll;
   .form-cliper-container {
     width: 500px;
     height: auto;

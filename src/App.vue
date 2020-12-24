@@ -368,7 +368,7 @@
               <el-input
                 type="text"
                 v-model="selectMenuItem.payload"
-                maxlength="40"
+                maxlength="400"
               ></el-input>
             </el-form-item>
             <el-form-item
@@ -397,7 +397,7 @@
               <el-input
                 type="text"
                 v-model="selectMenuItem.payload.key"
-                maxlength="6"
+                maxlength="400"
               ></el-input>
             </el-form-item>
             <el-form-item
@@ -409,7 +409,7 @@
             >
               <el-input
                 type="text"
-                maxlength="15"
+                maxlength="400"
                 v-model="selectMenuItem.payload.value"
               ></el-input>
             </el-form-item>

@@ -26,6 +26,7 @@
                 </div>
                 <a
                   class="demo-message-img"
+                  target="_blank"
                   :class="[
                     'style' + style,
                     'count' + headerImgs.length,
@@ -41,6 +42,7 @@
                 <a
                   class="demo-message-button"
                   :class="'style' + style"
+                  target="_blank"
                   v-else-if="headerItem.type === 'Button'"
                   :key="headerItem._id"
                   :href="headerItem.payload.link"
@@ -130,6 +132,7 @@
                     class="demo-buttons-button"
                     v-for="button in bodyItem.payload"
                     :key="button._id"
+                    target="_blank"
                     :href="button.payload.link"
                   >
                     {{

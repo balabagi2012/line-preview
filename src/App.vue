@@ -437,10 +437,9 @@
                 action="https://jsonplaceholder.typicode.com/posts/"
                 :auto-upload="false"
                 list-type="picture"
+                ref="uploadImg"
                 accept="image/png, image/jpeg, image/jpg"
-                :file-list="[
-                  { name: 'default.jpg', url: selectMenuItem.payload.url },
-                ]"
+                :file-list="fileList"
                 :on-change="beforeUpload"
                 :multiple="false"
               >
@@ -558,8 +557,12 @@ export default {
       this.selectMenuIndex = index;
     },
     beforeUpload(file) {
-      if (file.size > 1024 * 1024 * 2) {
+      if (file.size > 1024 * 1024 * 1) {
         this.$message.error("超過檔案大小限制");
+        this.$refs.uploadImg.uploadFiles = this.$refs.uploadImg.uploadFiles.slice(
+          0,
+          1
+        );
         return false;
       }
       this.transformFile(file);
@@ -629,8 +632,17 @@ export default {
       }
       this.$forceUpdate();
     },
+    handleRemove(file, fileList) {
+      console.log(file, fileList);
+    },
+    handlePreview(file) {
+      console.log(file);
+    },
   },
   computed: {
+    fileList() {
+      return [{ name: "default.jpg", url: this.selectMenuItem.payload.url }];
+    },
     canUp() {
       const [type, i] = this.selectMenuIndex.split("-");
       return this.menu[type].payload.length > 1 && parseInt(i) !== 0;

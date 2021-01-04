@@ -515,7 +515,16 @@ export default {
               value: "段落",
             },
           };
-          this.menu.body.payload.push(node);
+          if (this.style === 3) {
+            this.menu.body.payload = this.menu.body.payload
+              .slice(0, this.menu.body.payload.length - 1)
+              .concat([node])
+              .concat(
+                this.menu.body.payload.slice(this.menu.body.payload.length - 1)
+              );
+          } else {
+            this.menu.body.payload.push(node);
+          }
           break;
         case "Button":
           node = {
@@ -822,6 +831,7 @@ export default {
       overflow: hidden;
       border-top-left-radius: 17px;
       border-top-right-radius: 17px;
+      box-sizing: border-box;
       &.style1,
       &.style2 {
         height: 300px;
@@ -930,7 +940,7 @@ export default {
         position: absolute;
         bottom: 20px;
         left: 20px;
-        width: 100%;
+        width: calc(100% - 40px);
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -942,6 +952,9 @@ export default {
           font-size: 16px;
           margin-top: 3px;
           color: #fff;
+          display: block;
+          text-align: left;
+          word-break: break-all;
         }
       }
     }

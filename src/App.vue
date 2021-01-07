@@ -239,19 +239,13 @@
               @click="removeSelectedNode"
             ></el-button>
           </el-row>
-          <el-select
+          <q-select
             v-model="style"
-            placeholder="請選擇"
-            style="width: 100%; margin: 20px 0"
-          >
-            <el-option
-              v-for="n in 6"
-              :key="'樣式' + n"
-              :label="'樣式' + n"
-              :value="n"
-            >
-            </el-option>
-          </el-select>
+            class="bg-white"
+            style="margin-top: 20px;margin-bottom:10px"
+            :options="[1, 2, 3, 4, 5, 6]"
+            label="請選擇樣式"
+          />
           <el-col :span="24" class="node-menu">
             <el-menu
               :default-active="activeIndex"
@@ -324,10 +318,12 @@
               :label="'按鈕樣式'"
               v-if="selectMenuItem.type === 'Buttons'"
             >
-              <el-select v-model="selectMenuItem.style">
-                <el-option label="horizontal" value="horizontal"></el-option>
-                <el-option label="vertical" value="vertical"></el-option>
-              </el-select>
+              <q-select
+                v-model="selectMenuItem.style"
+                class="bg-white"
+                :options="['horizontal', 'vertical']"
+                label="請選擇樣式"
+              />
             </el-form-item>
             <el-form-item
               :label="'按鈕' + (index + 1) + '文字'"
@@ -780,6 +776,14 @@ export default {
 <style lang="scss" scoped>
 .line-preview {
   font-family: "黑體-繁", "微軟正黑體";
+  .bg-white {
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    padding: 0 15px;
+    .q-field--filled .q-field__control {
+      background: #fff;
+    }
+  }
 }
 .header {
   background-color: #f4f6f9;

@@ -207,21 +207,31 @@
         </el-col>
         <el-col :span="8" class="node-container">
           <el-row class="node-tools">
-            <el-dropdown style="margin-right: 12px" @command="addNode">
-              <el-button
-                type="primary"
-                icon="el-icon-plus"
-                :disabled="canAddItems.length == 0"
-              ></el-button>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item
-                  :command="item"
-                  v-for="(item, key) in canAddItems"
-                  :key="key"
-                  >{{ item }}</el-dropdown-item
-                >
-              </el-dropdown-menu>
-            </el-dropdown>
+            <q-btn
+              color="primary"
+              icon="add"
+              style="
+                margin-right: 12px;
+                height: 40px;
+                width: 56px;
+                border-radius: 4px;
+              "
+              :disable="canAddItems.length == 0"
+            >
+              <q-menu>
+                <q-list style="min-width: 100px">
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="addNode(item)"
+                    v-for="(item, key) in canAddItems"
+                    :key="key"
+                  >
+                    <q-item-section>{{ item }}</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
             <el-button
               icon="el-icon-arrow-up"
               @click="nodeUp"
@@ -242,7 +252,7 @@
           <q-select
             v-model="style"
             class="bg-white"
-            style="margin-top: 20px;margin-bottom:10px"
+            style="margin-top: 20px; margin-bottom: 10px"
             :options="[1, 2, 3, 4, 5, 6]"
             label="請選擇樣式"
           />
@@ -951,6 +961,7 @@ export default {
         .demo-description-key {
           font-size: 22px;
           color: #fff;
+          word-break: break-all;
         }
         .demo-description-value {
           font-size: 16px;
@@ -986,14 +997,17 @@ export default {
           height: 30px;
           .demo-description-key {
             color: #555;
+            word-break: break-all;
           }
           .demo-description-value {
             flex: 1;
             text-align: right;
             color: #111;
+            word-break: break-all;
           }
         }
         .demo-text-p {
+          word-break: break-all;
           color: #aaaaaa;
         }
       }
@@ -1007,12 +1021,15 @@ export default {
           margin-bottom: 8px;
           .demo-description-key {
             color: #fff;
+            word-break: break-all;
           }
           .demo-description-value {
             color: #fff;
+            word-break: break-all;
           }
         }
         .demo-text-p {
+          word-break: break-all;
           color: rgb(255, 255, 255);
         }
       }
@@ -1077,6 +1094,7 @@ export default {
           font-size: 14px;
           font-weight: 400;
           line-height: 20px;
+          word-break: break-all;
           color: rgb(170, 170, 170);
         }
         .demo-description-value {
@@ -1085,6 +1103,7 @@ export default {
           margin-left: 3px;
           font-weight: 400;
           line-height: 20px;
+          word-break: break-all;
           color: rgb(102, 102, 102);
         }
       }
@@ -1098,7 +1117,9 @@ export default {
     .demo-message-footer {
       display: flex;
       flex-direction: row;
+      flex-wrap: wrap;
       width: 100%;
+      word-break: break-all;
       .demo-text-note {
         font-size: 13px;
         font-weight: normal;
